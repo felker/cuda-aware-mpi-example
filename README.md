@@ -30,14 +30,24 @@ https://centers.hpc.mil/users/advancedTopics/Build_CUDA_src_with_MPI_when_mpih_n
 This (somewhat old) resource also recommends ``-I`mpicc --showme:incdirs` `` for OpenMPI platforms
 
 ## `nvc++ -cuda` and related flags
+Latest version of the NVIDIA HPC SDK as of writing is 22.5. 
+
+### Reference guide
+The compiler **reference guide** (vs. [user guide](https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-user-guide/index.htm) ) is similarly terse to above `-help` output, and makes it seem like `-cuda` is only used for the `nvfortran` compiler frontend:
+- https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-ref-guide/
+- https://docs.nvidia.com/hpc-sdk/pdf/hpc22ref.pdf
 
 > Usage
+> 
 > The following command-line requests that CUDA interoperability be enabled and CUDA Fortran syntax be recognized and processed in all Fortran files.
 ```
 $ nvfortran -cuda myprog.f
 ```
 
+But the user guide (see below) explicitly mentions OpenACC and OpenMP interoperatibiltiy with CUDA, so 
+
 > `-gpu`
+> 
 > Used in combination with the `-stdpar`, `-acc` and `-cuda` flags to specify options for GPU code generation. The following suboptions may be used following an equals sign ("="), with multiple sub-options separated by commas:
 
 > Specify details of GPU code generation including compute capability, CUDA version and more.
@@ -67,6 +77,8 @@ No more `__host__`, `__device__` annotations, `__CUDA_ARCH_`. Execution space in
 - `nvc++` and `nvfortran` 21.3 offer limited support for OpenMP Target offload for GPUs
 - [ ] Parallel range (C++2x) vs. parallel sequence (C++17) algorithms?
 
+### Manpage and user guide
+
 ```
 > man nvc++
 
@@ -83,6 +95,7 @@ compilation of CUDA Fortran accelerator regions:
 ```
 
 https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-user-guide/index.html
+
 They work in conjunction with an assembler, linker, libraries and header files on your target system, and include a CUDA toolchain, libraries and header files for GPU computing.
                  
 Rather, all of these details are implicit in the programming model and are managed by the NVIDIA HPC SDK Fortran, C⁠+⁠+ and C compilers. GPU programming with CUDA extensions gives you access to all NVIDIA GPU features and full control over data management and offloading of compute-intensive loops and kernels.
