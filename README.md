@@ -32,6 +32,23 @@ This (somewhat old) resource also recommends ``-I`mpicc --showme:incdirs` `` for
 ## `nvc++ -cuda` and related flags
 Latest version of the NVIDIA HPC SDK as of writing is 22.5. 
 
+### GTC 2021 video 
+
+
+Bryce Adelstein Lelbach's GTC 2021 talk promises NVC++ programming model interoperability as "coming soon":
+```
+nvc++ -stdpar -cuda -acc -mp
+```
+all in the same translation unit. ABI compatibility with each other and NVCC. 
+No more `__host__`, `__device__` annotations, `__CUDA_ARCH_`. Execution space inference
+
+
+- `nvc++ -stdpar=gpu` supported since NVHPC 20.7
+- `nvc++ -stdpar=multicore` supported since NVHPC 21.3
+- `nvfortran` 20.11 : standard **array** intrinsics
+- `nvc++` and `nvfortran` 21.3 offer limited support for OpenMP Target offload for GPUs
+- [ ] Parallel range (C++2x) vs. parallel sequence (C++17) algorithms?
+
 ### Reference guide
 The compiler **reference guide** (vs. [user guide](https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-user-guide/index.htm) ) is similarly terse to above `-help` output, and makes it seem like `-cuda` is only used for the `nvfortran` compiler frontend:
 - https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-ref-guide/
@@ -44,7 +61,9 @@ The compiler **reference guide** (vs. [user guide](https://docs.nvidia.com/hpc-s
 $ nvfortran -cuda myprog.f
 ```
 
-But the user guide (see below) explicitly mentions OpenACC and OpenMP interoperatibiltiy with CUDA, so 
+But the user guide (see below) explicitly mentions OpenACC and OpenMP interoperatibiltiy with CUDA, so this is likely just an example / outdated documentation from when the PGI CUDA Fortran extension was the only thing handled by the PGI compiler predecessor?
+
+More compiler option references have multiple
 
 > `-gpu`
 > 
@@ -53,29 +72,17 @@ But the user guide (see below) explicitly mentions OpenACC and OpenMP interopera
 > Specify details of GPU code generation including compute capability, CUDA version and more.
 
 > `-acc`
-> Enable OpenACC directives.
+> >
+> Enable OpenACC directives for GPUs (default) or multicore CPUs.
+
 
 > `-stdpar`
+> 
 > Enable ISO C++17 Parallel Algorithms behavior; please refer to `-gpu` for target-specific options
+>
+> Enable parallelization/offload of Standard C++ and Fortran parallel constructs; default is -stdpar=gpu.
 
-(KGF: although not mentioned above, ISO Fortran 2008 also supports a StdPar, `do concurrent`)
-
-> Enable parallelization/offload of Standard C++ and Fortran parallel constructs; default is `-stdpar=gpu`.
-
-Bryce Adelstein Lelbach's GTC 2021 talk promises NVC++ programming model interoperability as "coming soon":
-```
-nvc++ -stdpar -cuda -acc -mp
-```
-all in the same translation unit. ABI compatibility with each other and NVCC. 
-No more `__host__`, `__device__` annotations, `__CUDA_ARCH_`. Execution space inference
-
-
-- `nvc++ -stdpar=gpu` supported since NVHPC 20.7
-- `nvc++ -stdpar=multicore` supported since NVHPC 21.3
-
-- `nvfortran` 20.11 : standard **array** intrinsics
-- `nvc++` and `nvfortran` 21.3 offer limited support for OpenMP Target offload for GPUs
-- [ ] Parallel range (C++2x) vs. parallel sequence (C++17) algorithms?
+KGF: ISO Fortran 2008 also supports a StdPar, `do concurrent`
 
 ### Manpage and user guide
 
