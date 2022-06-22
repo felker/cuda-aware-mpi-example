@@ -20,15 +20,14 @@ See final section below for more details.
 See my offline note, `nvcc_vs_nvc_vs_nvc++_etc_and_kokkos.txt` for more details.
 
 ## General procedure for Cray MPICH wrapper compilers + `nvcc`
-
-- https://centers.hpc.mil/users/advancedTopics/Build_CUDA_src_with_MPI_when_mpih_not_found.html
+https://centers.hpc.mil/users/advancedTopics/Build_CUDA_src_with_MPI_when_mpih_not_found.html
 > The Cray MPI environment is hidden from the user in general. Most platforms provide MPI-specific compiler wrappers such as mpif90 and mpicxx which adds in the proper include directories for `mpi.h`, etc. The Cray wrappers `ftn`,`cc`, and `CC` do this same thing but they apply to all builds regardless if the source needs MPI headers.
 
 > Some CUDA source (`.cu`) files need MPI library calls and the `mpi.h` header but the CUDA compiler (nvcc) does not have knowledge of the include path to `mpi.h`. The the proper path to `<mpi dir>/include/mpi.h` can be tricky to find, especially with many MPI versions.
 
 > The Cray MPI module (cray-mpich) provides the environmental variable `$MPICH_DIR` which points to the base of MPI distribution of whichever module version is loaded. Users can add `-I$(MPICH_DIR)/include` to the `nvcc` build line.
 
-This (somewhat old) resource also recommends `-I\`mpicc --showme:incdirs\`` for OpenMPI platforms
+This (somewhat old) resource also recommends ``-I`mpicc --showme:incdirs` `` for OpenMPI platforms
 
 ## `nvc++ -cuda` and related flags
 
