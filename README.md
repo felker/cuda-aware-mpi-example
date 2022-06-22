@@ -5,7 +5,7 @@ Original source: https://github.com/NVIDIA-developer-blog/code-samples/tree/mast
 
 Key takeaways:
 - `-cuda` was getting accidentally passed to `nvcc` (meant to be passed only to `nvc++`); the flag works completely differently for both compilers. It tells `nvcc` to compile `.cu` input files to `.cu.cpp.ii` output files (something that needs to be compiled), not an object file. Hence the "file format not recognized" error when trying to link
-- For `nvc++`, the `-cuda` flag might not be needed for this application; might only be useful for Fortran targets at this time. Help documentation is very sparse:
+- For `nvc++`, the `-cuda` flag might not be needed for this application; might only be useful for CUDA Fortran targets at this time? Help documentation is very sparse:
 ```
 > nvc++ -help -cuda
          Enable CUDA; please refer to -gpu for target-specific options. 
@@ -21,7 +21,19 @@ See my offline note, `nvcc_vs_nvc_vs_nvc++_etc_and_kokkos.txt` for more details.
 
 ### TODO
 - [ ] Describe the differences between parallel range (C++2x) vs. parallel sequence (C++17) algorithms?
+- [ ] Still unclear; does this application need `nvc++ -cuda` flag at link-time for interoperability with the `nvcc`-compiled `device.o`? Try swapping the commented-out line:
 
+```
+#CUDALDFLAGS=-L${CUDA_INSTALL_PATH}/lib64 -lcudart
+CUDALDFLAGS=-L${CUDA_INSTALL_PATH}/lib64 -lcudart -cuda
+```
+
+- [ ] Summarize discussion from late summer 2022 in AMReX repo about this:
+
+
+- https://github.com/AMReX-Codes/amrex/pull/2282
+- https://github.com/AMReX-Codes/amrex/issues/2284
+- https://github.com/AMReX-Codes/amrex/pull/2066
 
 ## General procedure for Cray MPICH wrapper compilers + `nvcc`
 https://centers.hpc.mil/users/advancedTopics/Build_CUDA_src_with_MPI_when_mpih_not_found.html
@@ -57,14 +69,18 @@ The compiler **reference guide** (vs. [user guide](https://docs.nvidia.com/hpc-s
 - https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-ref-guide/
 - https://docs.nvidia.com/hpc-sdk/pdf/hpc22ref.pdf
 
-> Usage
+> `-cuda`
 > 
+> Enable CUDA; please refer to -gpu for target-specific options.
+
+> Usage
+> >
 > The following command-line requests that CUDA interoperability be enabled and CUDA Fortran syntax be recognized and processed in all Fortran files.
 ```
 $ nvfortran -cuda myprog.f
 ```
 
-But the user guide (see below) explicitly mentions OpenACC and OpenMP interoperatibiltiy with CUDA, so this is likely just an example / outdated documentation from when the PGI CUDA Fortran extension was the only thing handled by the PGI compiler predecessor?
+But the user guide (see below) explicitly mentions OpenACC and OpenMP interoperatibiltiy with CUDA, so this is likely just an example / outdated documentation from when the CUDA Fortran extension was the only thing handled by the PGI compiler predecessor?
 
 More compiler option references have multiple ambiguous and/or conflicting descriptions (e.g. in the summary section vs. the option section):
 
@@ -79,7 +95,6 @@ More compiler option references have multiple ambiguous and/or conflicting descr
 > Enable OpenACC directives. 
 > 
 > Enable OpenACC directives for GPUs (default) or multicore CPUs.
-
 
 > `-stdpar`
 > 
@@ -109,7 +124,7 @@ compilation of CUDA Fortran accelerator regions:
 
 https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-user-guide/index.html
 
-They work in conjunction with an assembler, linker, libraries and header files on your target system, and include a CUDA toolchain, libraries and header files for GPU computing.
+They (`nvc++`, `nvc`, `nvfortran` compilers) work in conjunction with an assembler, linker, libraries and header files on your target system, and include a CUDA toolchain, libraries and header files for GPU computing.
                  
 Rather, all of these details are implicit in the programming model and are managed by the NVIDIA HPC SDK Fortran, C⁠+⁠+ and C compilers. GPU programming with CUDA extensions gives you access to all NVIDIA GPU features and full control over data management and offloading of compute-intensive loops and kernels.
                  
