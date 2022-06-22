@@ -19,6 +19,10 @@ See final section below for more details.
 
 See my offline note, `nvcc_vs_nvc_vs_nvc++_etc_and_kokkos.txt` for more details.
 
+### TODO
+- [ ] Describe the differences between parallel range (C++2x) vs. parallel sequence (C++17) algorithms?
+
+
 ## General procedure for Cray MPICH wrapper compilers + `nvcc`
 https://centers.hpc.mil/users/advancedTopics/Build_CUDA_src_with_MPI_when_mpih_not_found.html
 > The Cray MPI environment is hidden from the user in general. Most platforms provide MPI-specific compiler wrappers such as mpif90 and mpicxx which adds in the proper include directories for `mpi.h`, etc. The Cray wrappers `ftn`,`cc`, and `CC` do this same thing but they apply to all builds regardless if the source needs MPI headers.
@@ -34,7 +38,6 @@ Latest version of the NVIDIA HPC SDK as of writing is 22.5.
 
 ### GTC 2021 video 
 
-
 Bryce Adelstein Lelbach's GTC 2021 talk promises NVC++ programming model interoperability as "coming soon":
 ```
 nvc++ -stdpar -cuda -acc -mp
@@ -42,14 +45,14 @@ nvc++ -stdpar -cuda -acc -mp
 all in the same translation unit. ABI compatibility with each other and NVCC. 
 No more `__host__`, `__device__` annotations, `__CUDA_ARCH_`. Execution space inference
 
-
+#### Summary of progress / new features
+First release of NVIDIA HPC SDK was 20.7.
 - `nvc++ -stdpar=gpu` supported since NVHPC 20.7
 - `nvc++ -stdpar=multicore` supported since NVHPC 21.3
 - `nvfortran` 20.11 : standard **array** intrinsics
 - `nvc++` and `nvfortran` 21.3 offer limited support for OpenMP Target offload for GPUs
-- [ ] Parallel range (C++2x) vs. parallel sequence (C++17) algorithms?
 
-### Reference guide
+### Compiler reference guide
 The compiler **reference guide** (vs. [user guide](https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-user-guide/index.htm) ) is similarly terse to above `-help` output, and makes it seem like `-cuda` is only used for the `nvfortran` compiler frontend:
 - https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-ref-guide/
 - https://docs.nvidia.com/hpc-sdk/pdf/hpc22ref.pdf
@@ -63,16 +66,18 @@ $ nvfortran -cuda myprog.f
 
 But the user guide (see below) explicitly mentions OpenACC and OpenMP interoperatibiltiy with CUDA, so this is likely just an example / outdated documentation from when the PGI CUDA Fortran extension was the only thing handled by the PGI compiler predecessor?
 
-More compiler option references have multiple
+More compiler option references have multiple ambiguous and/or conflicting descriptions (e.g. in the summary section vs. the option section):
 
 > `-gpu`
 > 
-> Used in combination with the `-stdpar`, `-acc` and `-cuda` flags to specify options for GPU code generation. The following suboptions may be used following an equals sign ("="), with multiple sub-options separated by commas:
-
+> Used in combination with the `-stdpar`, `-acc` and `-cuda` flags to specify options for GPU code generation.
+> 
 > Specify details of GPU code generation including compute capability, CUDA version and more.
 
 > `-acc`
-> >
+> 
+> Enable OpenACC directives. 
+> 
 > Enable OpenACC directives for GPUs (default) or multicore CPUs.
 
 
@@ -82,9 +87,10 @@ More compiler option references have multiple
 >
 > Enable parallelization/offload of Standard C++ and Fortran parallel constructs; default is -stdpar=gpu.
 
-KGF: ISO Fortran 2008 also supports a StdPar, `do concurrent`
+KGF: ISO Fortran 2008 also supports a StdPar, `do concurrent`.
 
-### Manpage and user guide
+### Manpage and compiler user guide
+The manpage is the most explicit endorsement that `-cuda` enables CUDA C++ compilation with `nvc++`, not just interoperability. 
 
 ```
 > man nvc++
