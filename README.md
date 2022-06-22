@@ -5,10 +5,14 @@ Original source: https://github.com/NVIDIA-developer-blog/code-samples/tree/mast
 
 Key takeaways:
 - `-cuda` was getting accidentally passed to `nvcc` (meant to be passed only to `nvc++`); the flag works completely differently for both compilers. It tells `nvcc` to compile `.cu` input files to `.cu.cpp.ii` output files (something that needs to be compiled), not an object file. Hence the "file format not recognized" error when trying to link
-- For `nvc++`, the `-cuda` flag:
-> Enable CUDA; please refer to `-gpu` for target-specific options. 
+- For `nvc++`, the `-cuda` flag might not be needed for this application; might only be useful for Fortran targets at this time. Help documentation is very sparse:
+```
+> nvc++ -help -cuda
+         Enable CUDA; please refer to -gpu for target-specific options. 
+```
+See final section below for more details.
 
-See below for more details.
+### Solution
 
 - Use `MPICFLAGS= $(shell CC --cray-print-opts=cflags)` to get the `mpi.h` include path, etc. flags to be passed to `nvcc` at compile (not link) time for CUDA source code files that `#inlcude <mpi.h>`
 - Link with `CC` or `cc` 
@@ -26,7 +30,7 @@ See my offline note, `nvcc_vs_nvc_vs_nvc++_etc_and_kokkos.txt` for more details.
 
 This (somewhat old) resource also recommends `-I\`mpicc --showme:incdirs\`` for OpenMPI platforms
 
-# `nvc++ -cuda` and related flags
+## `nvc++ -cuda` and related flags
 
 > Usage
 > The following command-line requests that CUDA interoperability be enabled and CUDA Fortran syntax be recognized and processed in all Fortran files.
@@ -63,3 +67,29 @@ No more `__host__`, `__device__` annotations, `__CUDA_ARCH_`. Execution space in
 - `nvfortran` 20.11 : standard **array** intrinsics
 - `nvc++` and `nvfortran` 21.3 offer limited support for OpenMP Target offload for GPUs
 - [ ] Parallel range (C++2x) vs. parallel sequence (C++17) algorithms?
+
+```
+> man nvc++
+
+If coinstalled with nvfortran, Fortran file suffixes are also recognized and compiled with the nvfortran
+compilers; see nvfortran and the  NVIDIA User's Guide.  Other files are passed to the linker (if linking
+is requested) with a warning message.
+       
+-cuda[=option[,option...]
+Enable CUDA C++ or CUDA Fortran, and link with the CUDA runtime libraries.  -cuda is required
+on the link line. If -cuda is used in compilation, it must also be used for linking.  For
+target specific options, please refer to -gpu.  For linking additional CUDA libraries (e.g.
+math libraries), please refer to -cudalib.  Use the following sub-options to tailor the
+compilation of CUDA Fortran accelerator regions:
+```
+
+https://docs.nvidia.com/hpc-sdk/compilers/hpc-compilers-user-guide/index.html
+They work in conjunction with an assembler, linker, libraries and header files on your target system, and include a CUDA toolchain, libraries and header files for GPU computing.
+                 
+Rather, all of these details are implicit in the programming model and are managed by the NVIDIA HPC SDK Fortran, C⁠+⁠+ and C compilers. GPU programming with CUDA extensions gives you access to all NVIDIA GPU features and full control over data management and offloading of compute-intensive loops and kernels.
+                 
+The NVIDIA HPC Compilers support interoperability between with CUDA Unified Memory.
+                 
+The NVIDIA HPC compilers use components from NVIDIA's CUDA Toolkit to build programs for execution on an NVIDIA GPU. The NVIDIA HPC SDK puts the CUDA Toolkit components into an HPC SDK installation sub-directory; the HPC SDK typically bundles three versions of recently-released Toolkits.
+                 
+The HPC Compilers support interoperability of OpenMP and CUDA to the same extent they support CUDA interoperability with OpenACC.
