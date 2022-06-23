@@ -28,6 +28,8 @@ See my offline note, `nvcc_vs_nvc_vs_nvc++_etc_and_kokkos.txt` for more details.
 CUDALDFLAGS=-L${CUDA_INSTALL_PATH}/lib64 -lcudart -cuda
 ```
 
+**Need to try this on Polaris, not ThetaGPU. Need MPI-wrapped `nvc++`**
+
 - [ ] Summarize discussion from late summer 2022 in AMReX repo about this:
 
 
