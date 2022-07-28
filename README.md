@@ -59,6 +59,8 @@ Currently Loaded Modules:
 ```
 
 ### GPUDirect newly broken as of 2022-07-27
+*Fixed as of 2022-07-28*
+
 1 node works fine:
 ```
 > mpiexec -np 4 --ppn 4 ./jacobi_cuda_aware_mpi -t 2 2 -d 128 128
