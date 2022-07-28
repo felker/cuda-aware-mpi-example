@@ -31,11 +31,72 @@ CUDALDFLAGS=-L${CUDA_INSTALL_PATH}/lib64 -lcudart -cuda
 **Need to try this on Polaris, not ThetaGPU. Need MPI-wrapped `nvc++`**
 
 - [ ] Summarize discussion from late summer 2022 in AMReX repo about this:
-
-
 - https://github.com/AMReX-Codes/amrex/pull/2282
 - https://github.com/AMReX-Codes/amrex/issues/2284
 - https://github.com/AMReX-Codes/amrex/pull/2066
+
+## Instructions (and pre- vs. post- AT changes)
+Needed to change the Makefile in d9b670fc71862ad7ded3468b7761713e1bc37f33 
+
+See extensive notes about changes from Tcl -> Lua and `PrgEnv-nvidia` to `PrgEnv-nvhpc` (and cudatoolkit module behavior changes) in: https://github.com/felker/athenak-scaling
+
+```
+qsub -A datascience -q workq -I -l select=2:ncpus=64:ngpus=4,walltime=00:30:00 -j oe -S /bin/bash
+cd ~/cuda-aware-mpi-example/src
+make clean; make
+cd ../bin
+export MPICH_GPU_SUPPORT_ENABLED=1
+mpiexec -np 8 --ppn 4 ./jacobi_cuda_aware_mpi -t 4 2 -d 128 128
+```
+
+Using defualt modules:
+```
+Currently Loaded Modules:
+  1) craype-x86-rome          5) nvhpc/21.9          9) cray-pmi/6.1.2       13) PrgEnv-nvhpc/8.3.3
+  2) libfabric/1.11.0.4.125   6) craype/2.7.15      10) cray-pmi-lib/6.0.17  14) craype-accel-nvidia80
+  3) craype-network-ofi       7) cray-dsmml/0.2.2   11) cray-pals/1.1.7
+  4) perftools-base/22.05.0   8) cray-mpich/8.1.16  12) cray-libpals/1.1.7
+```
+
+### GPUDirect newly broken as of 2022-07-27
+1 node works fine:
+```
+> mpiexec -np 4 --ppn 4 ./jacobi_cuda_aware_mpi -t 2 2 -d 128 128
+Topology size: 2 x 2
+Local domain size (current node): 128 x 128
+Global domain size (all nodes): 256 x 256
+Starting Jacobi run with 4 processes using "NVIDIA A100-SXM4-40GB" GPUs (ECC enabled: 4 / 4):
+Iteration: 0 - Residue: 0.249995
+Iteration: 100 - Residue: 0.002388
+Iteration: 200 - Residue: 0.001195
+Iteration: 300 - Residue: 0.000795
+Iteration: 400 - Residue: 0.000594
+Iteration: 500 - Residue: 0.000474
+Iteration: 600 - Residue: 0.000393
+Iteration: 700 - Residue: 0.000336
+Iteration: 800 - Residue: 0.000293
+Iteration: 900 - Residue: 0.000260
+Stopped after 1000 iterations with residue 0.000233
+Total Jacobi run time: 3.1890 sec.
+Average per-process communication time: 1.3001 sec.
+Measured lattice updates: 20.23 MLU/s (total), 5.06 MLU/s (per process)
+Measured FLOPS: 101.15 MFLOPS (total), 25.29 MFLOPS (per process)
+Measured device bandwidth: 1.29 GB/s (total), 323.69 MB/s (per process)
+```
+
+vs. multiple nodes:
+```
+> mpiexec -np 8 --ppn 4 ./jacobi_cuda_aware_mpi -t 4 2 -d 128 128
+...
+aborting job:
+Fatal error in PMPI_Sendrecv: Other MPI error, error stack:
+PMPI_Sendrecv(249)........: MPI_Sendrecv(sbuf=0x1537d3200418, scount=128, MPI_DOUBLE, dest=0, stag=0, rbuf=0x1537d
+3200008, rcount=128, MPI_DOUBLE, src=0, rtag=0, comm=0x84000002, status=0x7ffcadf8d490) failed
+MPID_Isend(584)...........:
+MPIDI_isend_unsafe(136)...:
+MPIDI_OFI_send_normal(352): OFI tagged senddata failed (ofi_send.h:352:MPIDI_OFI_send_normal:Bad address)
+x3202c0s19b1n0.hsn.cm.polaris.alcf.anl.gov: rank 4 exited with code 255
+```
 
 ## General procedure for Cray MPICH wrapper compilers + `nvcc`
 https://centers.hpc.mil/users/advancedTopics/Build_CUDA_src_with_MPI_when_mpih_not_found.html
