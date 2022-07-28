@@ -41,7 +41,8 @@ CFLAGS=-std=c99 -O3 -march=native -Wall
 
 MPICFLAGS= $(shell CC --cray-print-opts=cflags)
 
-CUDACFLAGS=-I${CUDA_INSTALL_PATH}/include
+#CUDACFLAGS=-I${CUDA_INSTALL_PATH}/include
+CUDACFLAGS=-I${NVIDIA_PATH}/cuda/include
 
 GENCODE_SM50    := -gencode arch=compute_50,code=sm_50
 GENCODE_SM52    := -gencode arch=compute_52,code=sm_52
@@ -54,8 +55,9 @@ GENCODE_FLAGS   := $(GENCODE_SM80)
 
 NVCCFLAGS=-O3 $(GENCODE_FLAGS) -Xcompiler -march=native
 
+CUDALDFLAGS=-L${NVIDIA_PATH}/cuda/lib64 -lcudart
 #CUDALDFLAGS=-L${CUDA_INSTALL_PATH}/lib64 -lcudart
-CUDALDFLAGS=-L${CUDA_INSTALL_PATH}/lib64 -lcudart -cuda
+#CUDALDFLAGS=-L${CUDA_INSTALL_PATH}/lib64 -lcudart -cuda
 
 # Description of binaries
 BINDIR=../bin
